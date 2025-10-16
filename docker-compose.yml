@@ -1,0 +1,52 @@
+services:
+  backend:
+    build: ./rdjr-back
+    container_name: rdjr-back
+    ports:
+      - "8000:8000"
+    volumes:
+      # Monte le code, mais PAS le dossier vendor (gain énorme de perf)
+      - ./rdjr-back:/app
+      - /app/vendor
+      - ./rdjr-back/storage:/app/storage
+    depends_on:
+      - mysql
+    environment:
+      APP_ENV: local
+      DB_CONNECTION: mysql
+      DB_HOST: mysql          # ✅ nom du conteneur MySQL (pas localhost)
+      DB_PORT: 3306
+      DB_DATABASE: rdjr
+      DB_USERNAME: root
+      DB_PASSWORD: azerty123
+
+  frontend:
+    build:
+      context: ./rdjr-front-test
+      dockerfile: Dockerfile
+    container_name: rdjr-front
+    ports:
+      - "5173:5173"
+    volumes:
+      # Monte ton code React mais pas node_modules (gain de vitesse énorme)
+      - ./rdjr-front-test:/app
+      - /app/node_modules
+    command: ["npm", "run", "dev", "--", "--host"]
+    environment:
+      - CHOKIDAR_USEPOLLING=true  # 👈 évite les crashs de hot reload sous Windows
+      - VITE_API_URL=http://localhost:8000  # 👈 pour que ton front sache où taper l'API
+
+  mysql:
+    image: mysql:8
+    container_name: rdjr-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: azerty123
+      MYSQL_DATABASE: rdjr
+    ports:
+      - "3307:3306" # ⚠️ port externe 3307 car 3306 est souvent déjà pris sur Windows
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
