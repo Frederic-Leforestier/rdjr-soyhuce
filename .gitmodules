@@ -1,0 +1,6 @@
+[submodule "rdjr-back"]
+	path = rdjr-back
+	url = https://github.com/Frederic-Leforestier/rdjr-back.git
+[submodule "rdjr-front-test"]
+	path = rdjr-front-test
+	url = https://github.com/Frederic-Leforestier/rdjr-front-test.git
